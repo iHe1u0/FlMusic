@@ -1,9 +1,13 @@
-import 'package:audioplayers/audioplayers.dart';
-import 'package:flmusic/pages/error.dart';
-import 'package:flutter/foundation.dart';
+import 'dart:io';
+import 'package:flmusic/models/audio_file.dart';
+import 'package:flmusic/widgets/error.dart';
+import 'package:flmusic/services/k_audio_player.dart';
 import 'package:flutter/material.dart';
 import 'package:mime/mime.dart';
-import 'package:webdav_client/webdav_client.dart';
+import 'package:webdav_client/webdav_client.dart' as webdav;
+import 'package:audio_metadata_reader/audio_metadata_reader.dart';
+
+typedef WebFile = webdav.File;
 
 class MusicListPage extends StatefulWidget {
   const MusicListPage({super.key});
@@ -15,23 +19,22 @@ class MusicListPage extends StatefulWidget {
 class _MusicListPageState extends State<MusicListPage>
     with SingleTickerProviderStateMixin {
   late AnimationController _controller;
-  late Client _client;
+  late webdav.Client _client;
 
-  // config server infomation
-  final url = 'http://192.168.0.109:10524/';
-  final user = 'kc_user';
+  // final url = 'http://192.168.0.109:10524';
+  final url = '';
+  final user = '';
   final password = '';
-  var dirPath = '/';
+  var dirPath = 'Music';
 
   @override
   void initState() {
     super.initState();
-    _controller = AnimationController(vsync: this);
-    // init webdav client
-    _client = newClient(url, user: user, password: password, debug: false);
-    // create Music dir
-    _client.mkdir('/Music');
-    dirPath += 'Music';
+    _controller =
+        AnimationController(vsync: this, duration: const Duration(seconds: 1));
+    _client =
+        webdav.newClient(url, user: user, password: password, debug: false);
+    _client.mkdir(dirPath);
   }
 
   @override
@@ -46,77 +49,75 @@ class _MusicListPageState extends State<MusicListPage>
       return const ErrorDisplay(errorMessage: 'Wrong Parameters!');
     }
     return Scaffold(
-      body: FutureBuilder(
-          future: _getData(),
-          builder: (BuildContext context, AsyncSnapshot<List<File>> snapshot) {
-            switch (snapshot.connectionState) {
-              case ConnectionState.none:
-              case ConnectionState.active:
-              case ConnectionState.waiting:
-                return const Center(child: CircularProgressIndicator());
-              case ConnectionState.done:
-                if (snapshot.hasError) {
-                  return Center(child: Text('Error: ${snapshot.error}'));
-                }
-                return _buildListView(context, snapshot.data ?? []);
-            }
-          }),
+      body: FutureBuilder<List<WebFile>>(
+        future: _getData(),
+        builder: (context, snapshot) {
+          if (snapshot.connectionState == ConnectionState.waiting) {
+            return const Center(child: CircularProgressIndicator());
+          } else if (snapshot.hasError) {
+            return Center(child: Text('Error: ${snapshot.error}'));
+          } else {
+            return _buildListView(context, snapshot.data ?? []);
+          }
+        },
+      ),
+      floatingActionButton: FloatingActionButton(
+        onPressed: () {},
+        child: const Icon(Icons.upload_file),
+      ),
     );
   }
 
-  Future<List<File>> _getData() {
+  Future<List<WebFile>> _getData() {
     return _client.readDir(dirPath);
   }
 
-  Widget _buildListView(BuildContext context, List<File> list) {
-    var data = _sortList(list);
-
-    if (kDebugMode) {
-      for (final f in data) {
-        debugPrint(f.path);
-      }
-    }
-
-    return ListView.builder(
-        itemCount: data.length,
-        itemBuilder: (context, index) {
-          final file = data[index];
-          return ListTile(
-            leading: Icon(
-                file.isDir == true ? Icons.folder : Icons.file_present_rounded),
-            title: Text(file.name ?? ''),
-            subtitle: Text(file.mTime.toString()),
-            onTap: () async {
-              // debugPrint(file.path);
-              dirPath = file.path.toString();
-              if (file.isDir == true) {
-                _getData().then((newData) {
-                  setState(() {
-                    data.clear();
-                    data.addAll(newData);
-                  });
-                });
-              } else {
-                _playMusic(dirPath);
-              }
-            },
-          );
-        });
+  Widget _buildListView(BuildContext context, List<WebFile> list) {
+    return FutureBuilder<List<AudioFile>>(
+      future: _sortList(list),
+      builder: (context, snapshot) {
+        if (snapshot.connectionState == ConnectionState.waiting) {
+          return const Center(child: CircularProgressIndicator());
+        }
+        final data = snapshot.data ?? [];
+        if (data.isEmpty) {
+          return const ErrorDisplay(errorMessage: '没找到文件');
+        }
+        return ListView.builder(
+          itemCount: data.length,
+          itemBuilder: (context, index) {
+            final file = data[index];
+            return ListTile(
+              leading: const Icon(Icons.music_note),
+              title: Text(file.title ?? '未知歌曲'),
+              subtitle: Text(file.songer ?? '未知艺术家'),
+              onTap: () => _playMusic(file.path),
+            );
+          },
+        );
+      },
+    );
   }
 
   void _playMusic(String source) {
     final file = url + source;
-    final audioPlayer = AudioPlayer();
-    audioPlayer.play(UrlSource(file));
+    final audioPlayer = KAudioPlayer.getInstance();
+    audioPlayer.play(file);
   }
 
-  List<File> _sortList(List<File> src) {
-    var des = src;
+  Future<List<AudioFile>> _sortList(List<WebFile> src) async {
+    final List<AudioFile> des = [];
     for (final file in src) {
       if (file.path != null) {
         final mimeType = lookupMimeType(file.path!);
-        if (mimeType != null && mimeType.startsWith('audio/*')) {
-          src.add(file);
+        if (mimeType?.startsWith('audio/') == true) {
+          // final metadata = await readMetadata(File(url + file.path!), getImage: false);
+          // readMetadata(File(url + file.path!), getImage: false)
+          //     .then((metadata) {
+          //   des.add(AudioFile(file.path!,
+          //       title: metadata.title, songer: metadata.album ?? '未知艺术家'));
+          // });
+          des.add(AudioFile(file.path!));
         }
       }
     }

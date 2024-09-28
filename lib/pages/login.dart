@@ -18,17 +18,18 @@ class _LoginPageState extends State<LoginPage> {
   void _login() {
     if (_formKey.currentState?.validate() == true) {
       String username = _usernameController.text;
+      // ignore: unused_local_variable
       String password = _passwordController.text;
 
       // 模拟登录处理逻辑
-      if (kDebugMode) {
-        ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-          content: Text(
-              'Logging in with username: $username and password: $password'),
-        ));
-      }
+      // if (kDebugMode) {
+      //   ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+      //     content: Text(
+      //         'Logging in with username: $username and password: $password'),
+      //   ));
+      // }
       // 跳转页面
-      Navigator.pushNamed(context, "/music_list",
+      Navigator.pushReplacementNamed(context, "/music_list",
           arguments: User(username.isEmpty ? "kc_user" : username));
     }
   }
