@@ -1,5 +1,8 @@
+import 'package:audioplayers/audioplayers.dart';
+import 'package:flmusic/pages/error.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:mime/mime.dart';
 import 'package:webdav_client/webdav_client.dart';
 
 class MusicListPage extends StatefulWidget {
@@ -26,6 +29,9 @@ class _MusicListPageState extends State<MusicListPage>
     _controller = AnimationController(vsync: this);
     // init webdav client
     _client = newClient(url, user: user, password: password, debug: false);
+    // create Music dir
+    _client.mkdir('/Music');
+    dirPath += 'Music';
   }
 
   @override
@@ -37,7 +43,7 @@ class _MusicListPageState extends State<MusicListPage>
   @override
   Widget build(BuildContext context) {
     if (url.isEmpty || user.isEmpty || password.isEmpty) {
-      return const Center(child: Text('Wrong parameters'));
+      return const ErrorDisplay(errorMessage: 'Wrong Parameters!');
     }
     return Scaffold(
       body: FutureBuilder(
@@ -63,14 +69,7 @@ class _MusicListPageState extends State<MusicListPage>
   }
 
   Widget _buildListView(BuildContext context, List<File> list) {
-    var data = list;
-    if (data.isNotEmpty) {}
-    data.toList()
-      .sort((a, b) {
-        if ((a.isDir == true) && !(b.isDir == true)) return -1; // 文件夹排在前
-        if (!(a.isDir == true) && (b.isDir == true)) return 1; // 文件排在后
-        return a.name!.compareTo(b.name!); // 同类按名称排序
-      });
+    var data = _sortList(list);
 
     if (kDebugMode) {
       for (final f in data) {
@@ -98,12 +97,29 @@ class _MusicListPageState extends State<MusicListPage>
                   });
                 });
               } else {
-                _playMusic();
+                _playMusic(dirPath);
               }
             },
           );
         });
   }
 
-  void _playMusic() {}
+  void _playMusic(String source) {
+    final file = url + source;
+    final audioPlayer = AudioPlayer();
+    audioPlayer.play(UrlSource(file));
+  }
+
+  List<File> _sortList(List<File> src) {
+    var des = src;
+    for (final file in src) {
+      if (file.path != null) {
+        final mimeType = lookupMimeType(file.path!);
+        if (mimeType != null && mimeType.startsWith('audio/*')) {
+          src.add(file);
+        }
+      }
+    }
+    return des;
+  }
 }

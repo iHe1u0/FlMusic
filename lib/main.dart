@@ -12,15 +12,17 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // return MaterialApp(
-    //   title: 'Flutter Music',
-    //   theme: ThemeData(
-    //     primarySwatch: Colors.blue,
-    //   ),
-    //   home: const LoginPage(),
-    // );
     return MaterialApp(
-      title: 'Flutter Music',
+      title: '登录/Login',
+      theme: ThemeData(
+        primarySwatch: Colors.blue, // 浅色模式的主色
+        brightness: Brightness.light, // 浅色模式
+      ),
+      darkTheme: ThemeData(
+        primarySwatch: Colors.deepOrange, // 深色模式的主色
+        brightness: Brightness.dark, // 深色模式
+      ),
+      themeMode: ThemeMode.system, // 跟随系统自动切换主题
       routes: {
         "/": (context) => const LoginPage(),
         "/music_list": (context) => const MusicListPage()
