@@ -1,4 +1,5 @@
 import 'package:flmusic/pages/music_list.dart';
+import 'package:flmusic/pages/play_ui.dart';
 import 'package:flutter/material.dart';
 
 import 'pages/login.dart';
@@ -25,7 +26,8 @@ class MyApp extends StatelessWidget {
       themeMode: ThemeMode.system, // 跟随系统自动切换主题
       routes: {
         "/": (context) => const LoginPage(),
-        "/music_list": (context) => const MusicListPage()
+        "/music_list": (context) => const MusicListPage(),
+        "/player_ui": (context) => const PlayUi(),
       },
     );
   }
