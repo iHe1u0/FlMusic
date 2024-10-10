@@ -1,6 +1,7 @@
 import 'package:flmusic/models/user.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 
 class LoginPage extends StatefulWidget {
   const LoginPage({super.key});
@@ -11,15 +12,21 @@ class LoginPage extends StatefulWidget {
 }
 
 class _LoginPageState extends State<LoginPage> {
+  final _storage = const FlutterSecureStorage();
   final _formKey = GlobalKey<FormState>();
   final TextEditingController _usernameController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
 
+  // const Key for user and password
+  static const String keyUser = "user";
+  static const String keyPassword = "password";
   void _login() {
     if (_formKey.currentState?.validate() == true) {
-      String username = _usernameController.text;
-      // ignore: unused_local_variable
-      String password = _passwordController.text;
+      String username = _usernameController.text.trim();
+      String password = _passwordController.text.trim();
+
+      _storage.write(key: keyUser, value: username);
+      _storage.write(key: keyPassword, value: password);
 
       // 模拟登录处理逻辑
       // if (kDebugMode) {
@@ -32,6 +39,17 @@ class _LoginPageState extends State<LoginPage> {
       Navigator.pushReplacementNamed(context, "/music_list",
           arguments: User(username.isEmpty ? "kc_user" : username));
     }
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    _storage
+        .read(key: keyUser)
+        .then((user) => {_usernameController.text = user ?? ""});
+    _storage
+        .read(key: keyPassword)
+        .then((password) => {_passwordController.text = password ?? ""});
   }
 
   @override
