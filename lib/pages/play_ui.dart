@@ -12,7 +12,10 @@ class PlayUi extends StatefulWidget {
 }
 
 class PlayUiState extends State<PlayUi> {
+  // AudioPlayer instance
   KAudioPlayer audioPlayer = KAudioPlayer.getInstance();
+  // Real Audio Player
+  late AudioPlayer player;
 
   bool isPlaying = false;
   double progress = 0.0; // This represents the current position of the audio
@@ -27,32 +30,17 @@ class PlayUiState extends State<PlayUi> {
 
     audioFile = ModalRoute.of(context)!.settings.arguments as AudioFile;
     // debugPrint(audioFile.path);
-    audioPlayer.play(url: audioFile.path);
+    audioPlayer.init(url: audioFile.path);
+    audioPlayer.play();
+
+    player = audioPlayer.getPlayer();
+
+    _addObserver(player);
   }
 
   @override
   void initState() {
     super.initState();
-    // Listen to state changes
-    audioPlayer.getPlayer().onPlayerStateChanged.listen((PlayerState state) {
-      setState(() {
-        isPlaying = (state == PlayerState.playing);
-      });
-    });
-
-    // Listen to position changes
-    audioPlayer.getPlayer().onPositionChanged.listen((Duration position) {
-      setState(() {
-        currentPosition = position;
-      });
-    });
-
-    // Listen to duration changes
-    audioPlayer.getPlayer().onDurationChanged.listen((Duration duration) {
-      setState(() {
-        totalDuration = duration;
-      });
-    });
   }
 
   @override
@@ -108,7 +96,9 @@ class PlayUiState extends State<PlayUi> {
 
             // Progress bar
             Slider(
-              value: currentPosition.inSeconds.toDouble(),
+              value: totalDuration.inSeconds.toDouble() > 0
+                  ? currentPosition.inSeconds.toDouble()
+                  : 0,
               min: 0,
               max: totalDuration.inSeconds.toDouble(),
               onChanged: (value) {
@@ -178,5 +168,35 @@ class PlayUiState extends State<PlayUi> {
   String _formatDuration(Duration duration) {
     String twoDigits(int n) => n.toString().padLeft(2, '0');
     return '${twoDigits(duration.inMinutes)}:${twoDigits(duration.inSeconds.remainder(60))}';
+  }
+
+  // Add UI observer
+  void _addObserver(AudioPlayer player) {
+    // Listen to state changes
+    player.onPlayerStateChanged.listen((PlayerState state) {
+      if (mounted) {
+        setState(() {
+          isPlaying = (state == PlayerState.playing);
+        });
+      }
+    });
+
+    // Listen to position changes
+    player.onPositionChanged.listen((Duration position) {
+      if (mounted) {
+        setState(() {
+          currentPosition = position;
+        });
+      }
+    });
+
+    // Listen to duration changes
+    player.onDurationChanged.listen((Duration duration) {
+      if (mounted) {
+        setState(() {
+          totalDuration = duration;
+        });
+      }
+    });
   }
 }

@@ -100,7 +100,7 @@ class _MusicListPageState extends State<MusicListPage>
     // final file = source;
     // final audioPlayer = KAudioPlayer.getInstance();
     // audioPlayer.play(file);
-    Navigator.pushReplacementNamed(context, "/player_ui", arguments: file);
+    Navigator.pushNamed(context, "/player_ui", arguments: file);
   }
 
   Future<List<AudioFile>> _sortList(List<WebFile> src) async {
