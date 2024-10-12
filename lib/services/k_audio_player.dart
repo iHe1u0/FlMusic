@@ -1,4 +1,5 @@
 import 'package:audioplayers/audioplayers.dart';
+import 'package:flutter/foundation.dart';
 
 class KAudioPlayer {
   static KAudioPlayer? _instance;
@@ -22,29 +23,23 @@ class KAudioPlayer {
     return _player!;
   }
 
-  Future<void> init({String? url}) async {
-    bool needPlay = false;
+  Future<void> setMediaUrl({String? url}) async {
+    // Check if it's same media
+    debugPrint('set url:$url');
+
+    // Update media path and reset AudioPlayer
     if (url != null) {
-      // Use previous data if initialize player with same path
-      if (url == _path && _player?.state == PlayerState.paused) {
-        needPlay = true;
-        _player?.play(UrlSource(url));
-        return;
-      }
       _path = url;
     }
-    if (!needPlay && _player?.state == PlayerState.playing) {
-      _player?.stop();
-      _player?.release();
-      _player = AudioPlayer();
-    }
-    _player
-        ?.getDuration()
-        .then((duration) => {_duration = duration ?? const Duration()});
+
+    // 获取音频时长
+    _duration = await _player?.getDuration() ?? const Duration();
   }
 
   Future<void> play({String? url}) async {
-    await init(url: url);
+    if (url != null) {
+      await setMediaUrl(url: url);
+    }
     await _player?.play(UrlSource(_path));
   }
 

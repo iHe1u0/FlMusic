@@ -30,17 +30,24 @@ class PlayUiState extends State<PlayUi> {
 
     audioFile = ModalRoute.of(context)!.settings.arguments as AudioFile;
     // debugPrint(audioFile.path);
-    audioPlayer.init(url: audioFile.path);
-    audioPlayer.play();
-
-    player = audioPlayer.getPlayer();
-
-    _addObserver(player);
+    audioPlayer.setMediaUrl(url: audioFile.path).then((v) {
+      audioPlayer.play().then((_) {});
+    });
   }
 
   @override
   void initState() {
     super.initState();
+    player = audioPlayer.getPlayer();
+    _addObserver(player);
+  }
+
+  @override
+  void dispose() {
+    player.onPlayerStateChanged.drain();
+    player.onPositionChanged.drain();
+    player.onDurationChanged.drain();
+    super.dispose();
   }
 
   @override
@@ -141,7 +148,7 @@ class PlayUiState extends State<PlayUi> {
                     if (isPlaying) {
                       audioPlayer.pause();
                     } else {
-                      audioPlayer.play(url: audioFile.path);
+                      audioPlayer.play();
                     }
                   },
                 ),

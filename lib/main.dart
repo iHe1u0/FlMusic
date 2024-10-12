@@ -20,7 +20,7 @@ class MyApp extends StatelessWidget {
         brightness: Brightness.light, // 浅色模式
       ),
       darkTheme: ThemeData(
-        primarySwatch: Colors.deepOrange, // 深色模式的主色
+        primarySwatch: Colors.green, // 深色模式的主色
         brightness: Brightness.dark, // 深色模式
       ),
       themeMode: ThemeMode.system, // 跟随系统自动切换主题
