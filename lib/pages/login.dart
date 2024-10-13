@@ -18,8 +18,8 @@ class _LoginPageState extends State<LoginPage> {
   final TextEditingController _passwordController = TextEditingController();
 
   // const Key for user and password
-  static const String keyUser = "user";
-  static const String keyPassword = "password";
+  static const String keyUser = "sk_user";
+  static const String keyPassword = "sk_password";
   void _login() {
     if (_formKey.currentState?.validate() == true) {
       String username = _usernameController.text.trim();
@@ -46,10 +46,10 @@ class _LoginPageState extends State<LoginPage> {
     super.initState();
     _storage
         .read(key: keyUser)
-        .then((user) => {_usernameController.text = user ?? ""});
+        .then((user) => {_usernameController.text = user ?? "1"});
     _storage
         .read(key: keyPassword)
-        .then((password) => {_passwordController.text = password ?? ""});
+        .then((password) => {_passwordController.text = password ?? "1"});
   }
 
   @override

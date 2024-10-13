@@ -1,8 +1,8 @@
 import 'package:audioplayers/audioplayers.dart';
+import 'package:flmusic/models/audio_file.dart';
 import 'package:flmusic/services/k_audio_player.dart';
 import 'package:flmusic/widgets/error.dart';
 import 'package:flutter/material.dart';
-import 'package:flmusic/models/audio_file.dart';
 
 class PlayUi extends StatefulWidget {
   const PlayUi({super.key});
@@ -14,6 +14,7 @@ class PlayUi extends StatefulWidget {
 class PlayUiState extends State<PlayUi> {
   // AudioPlayer instance
   KAudioPlayer audioPlayer = KAudioPlayer.getInstance();
+
   // Real Audio Player
   late AudioPlayer player;
 
@@ -31,7 +32,11 @@ class PlayUiState extends State<PlayUi> {
     audioFile = ModalRoute.of(context)!.settings.arguments as AudioFile;
     // debugPrint(audioFile.path);
     audioPlayer.setMediaUrl(url: audioFile.path).then((v) {
-      audioPlayer.play().then((_) {});
+      audioPlayer.play().then((_) {
+        audioPlayer.getDuration().then((time) {
+          totalDuration = time;
+        });
+      });
     });
   }
 
@@ -111,7 +116,7 @@ class PlayUiState extends State<PlayUi> {
               onChanged: (value) {
                 setState(() {
                   currentPosition = Duration(seconds: value.toInt());
-                  audioPlayer.getPlayer().seek(currentPosition);
+                  player.seek(currentPosition);
                 });
               },
             ),

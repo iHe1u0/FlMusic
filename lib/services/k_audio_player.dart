@@ -3,15 +3,21 @@ import 'package:flutter/foundation.dart';
 
 class KAudioPlayer {
   static KAudioPlayer? _instance;
+
+  late List<String> _list;
+
   // Real audio player
   AudioPlayer? _player;
+
   // Media path, which is playing or cached
   String _path = "";
+
   // Media duration, initialize when setUrl
   late Duration _duration;
 
   KAudioPlayer._internal() {
     _player = AudioPlayer();
+    _list = List.empty();
   }
 
   static KAudioPlayer getInstance() {
@@ -31,16 +37,25 @@ class KAudioPlayer {
     if (url != null) {
       _path = url;
     }
-
-    // 获取音频时长
-    _duration = await _player?.getDuration() ?? const Duration();
   }
 
   Future<void> play({String? url}) async {
     if (url != null) {
       await setMediaUrl(url: url);
     }
-    await _player?.play(UrlSource(_path));
+    if (_player != null) {
+      final player = _player!;
+      player.play(UrlSource(_path)).then((_) {
+        // 获取音频时长
+        player.getDuration().then((time) {
+          _duration = time ?? const Duration();
+        });
+      });
+      // Set looper
+      if (_list.isNotEmpty) {
+        player.onPlayerComplete.listen((onComplete) {});
+      }
+    }
   }
 
   Future<void> pause() async {
@@ -63,7 +78,9 @@ class KAudioPlayer {
     return _player!.state;
   }
 
-  Duration getDuration() {
+  Future<Duration> getDuration() async {
+    final time = await _player?.getDuration();
+    _duration = time ?? const Duration();
     return _duration;
   }
 }
