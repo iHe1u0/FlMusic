@@ -1,0 +1,22 @@
+{
+    "login": "登录",
+    "@login": {
+        "description": "登录"
+    },
+    "account": "账号",
+    "@account": {
+        "description": "请输入账号"
+    },
+    "password": "密码",
+    "@password": {
+        "description": "请输入密码"
+    },
+    "password_is_null": "请输入密码",
+    "@password_is_null": {
+        "description": "密码为空，请输入密码"
+    },
+    "account_is_null": "请输入账号",
+    "@account_is_null": {
+        "description": "账号为空，请输入账号"
+    }
+}

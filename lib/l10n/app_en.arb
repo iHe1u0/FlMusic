@@ -1,0 +1,7 @@
+{
+    "login": "Login",
+    "account": "Account",
+    "password": "Password",
+    "account_is_null": "account is null, please input correct account",
+    "password_is_null": "password is null, please input correct password"
+}

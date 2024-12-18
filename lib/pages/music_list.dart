@@ -1,3 +1,4 @@
+import 'package:flmusic/common/global.dart';
 import 'package:flmusic/models/audio_file.dart';
 import 'package:flmusic/widgets/error.dart';
 import 'package:flutter/material.dart';
@@ -13,25 +14,16 @@ class MusicListPage extends StatefulWidget {
   State<MusicListPage> createState() => _MusicListPageState();
 }
 
-class _MusicListPageState extends State<MusicListPage>
-    with SingleTickerProviderStateMixin {
+class _MusicListPageState extends State<MusicListPage> with SingleTickerProviderStateMixin {
   late AnimationController _controller;
   late webdav.Client _client;
-
-  final url = 'http://192.168.0.109:10524';
-  // final url = 'http://192.168.0.109:10524';
-  final user = '';
-  final password = '';
-  var dirPath = 'Music';
 
   @override
   void initState() {
     super.initState();
-    _controller =
-        AnimationController(vsync: this, duration: const Duration(seconds: 1));
-    _client =
-        webdav.newClient(url, user: user, password: password, debug: false);
-    _client.mkdir(dirPath);
+    _controller = AnimationController(vsync: this, duration: const Duration(seconds: 1));
+    _client = Global.getServer();
+    // _client.mkdir(dirPath);
   }
 
   @override
@@ -66,7 +58,7 @@ class _MusicListPageState extends State<MusicListPage>
   }
 
   Future<List<WebFile>> _getData() {
-    return _client.readDir(dirPath);
+    return _client.readDir("/");
   }
 
   Widget _buildListView(BuildContext context, List<WebFile> list) {
@@ -97,9 +89,6 @@ class _MusicListPageState extends State<MusicListPage>
   }
 
   void _playMusic(AudioFile file) {
-    // final file = source;
-    // final audioPlayer = KAudioPlayer.getInstance();
-    // audioPlayer.play(file);
     Navigator.pushNamed(context, "/player_ui", arguments: file);
   }
 
@@ -115,7 +104,7 @@ class _MusicListPageState extends State<MusicListPage>
           //   des.add(AudioFile(file.path!,
           //       title: metadata.title, songer: metadata.album ?? '未知艺术家'));
           // });
-          des.add(AudioFile(url + file.path!));
+          des.add(AudioFile("http://192.168.0.109:10924/index.php/dav/my/${file.path!}"));
         }
       }
     }
