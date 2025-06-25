@@ -1,9 +1,9 @@
 import 'package:flmusic/common/global.dart';
+import 'package:flmusic/l10n/app_localizations.dart' show AppLocalizations;
 import 'package:flmusic/models/user.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
-import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 class LoginPage extends StatefulWidget {
   const LoginPage({super.key});
@@ -37,7 +37,7 @@ class LoginPageState extends State<LoginPage> {
       //   ));
       // }
       // 跳转页面
-      Global.init('http://192.168.0.109:10924/index.php/dav/my/我的音乐', username, password).then(
+      Global.init('http://raspberrypi:10924/index.php/dav/my/我的音乐', username, password).then(
         (_) {
           if (context.mounted) {
             // ignore: use_build_context_synchronously

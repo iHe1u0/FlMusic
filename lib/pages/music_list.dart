@@ -104,7 +104,7 @@ class _MusicListPageState extends State<MusicListPage> with SingleTickerProvider
           //   des.add(AudioFile(file.path!,
           //       title: metadata.title, songer: metadata.album ?? '未知艺术家'));
           // });
-          des.add(AudioFile("http://192.168.0.109:10924/index.php/dav/my/${file.path!}"));
+          des.add(AudioFile("http://raspberrypi:10924/index.php/dav/my/${file.path!}"));
         }
       }
     }
